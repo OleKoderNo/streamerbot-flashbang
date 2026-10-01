@@ -16,12 +16,37 @@ public class CPHInline
         string lightIp = "192.168.68.53";
         string lightUrl = $"http://{lightIp}:9123/elgato/lights";
 
+        string scene = "Redeem Effects";
+        string source = "Flashbang";
+        string filter = "Hide Visual";
+
+        int explosionDelayMs = 1250;
+
         lock (flashLock)
         {
+            if (!CPH.ObsIsConnected())
+            {
+                CPH.LogError("[Flashbang] OBS is not connected.");
+                return false;
+            }
+
             try
             {
                 try
                 {
+                    // Prepare and start the animation.
+                    CPH.ObsSetSourceVisibility(scene, source, false);
+                    CPH.ObsSetFilterState(scene, source, filter, 1);
+                    CPH.ObsSetSourceVisibility(scene, source, true);
+                    CPH.ObsMediaRestart(scene, source);
+
+                    CPH.LogInfo("[Flashbang] Animation started.");
+
+                    CPH.Wait(explosionDelayMs);
+
+                    // Hide the picture while allowing its audio to continue.
+                    CPH.ObsSetFilterState(scene, source, filter, 0);
+
                     SetLight(lightUrl, 100);
                     CPH.LogInfo("[Flashbang] Brightness set to 100%.");
 
@@ -29,16 +54,23 @@ public class CPHInline
                 }
                 finally
                 {
-                    SetLight(lightUrl, 20);
-                    CPH.LogInfo("[Flashbang] Baseline restored to 20%.");
+                    try
+                    {
+                        SetLight(lightUrl, 20);
+                        CPH.LogInfo("[Flashbang] Baseline restored to 20%.");
+                    }
+                    finally
+                    {
+                        CPH.ObsSetSourceVisibility(scene, source, false);
+                        CPH.ObsSetFilterState(scene, source, filter, 1);
+                    }
                 }
 
                 return true;
             }
             catch (Exception error)
             {
-                CPH.LogError($"[Flashbang] Flash failed: {error.Message}");
-
+                CPH.LogError($"[Flashbang] Sequence failed: {error.Message}");
                 return false;
             }
         }

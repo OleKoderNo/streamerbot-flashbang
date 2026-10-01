@@ -31,20 +31,22 @@ Edit the code in VS Code, then copy the updated code into Streamer.bot to compil
 
 ## Current progress
 
-The C# action runs a timed flash on one Elgato Key Light:
+The C# action combines an OBS animation and sound with an Elgato
+Key Light flash.
 
-- Sets brightness to 100%.
-- Waits three seconds.
-- Restores brightness to 20%.
-- Uses approximately 4100 K for both settings.
+1. Starts the Flashbang media source in Redeem Effects.
+2. Waits 1250 milliseconds.
+3. Hides the picture using the Hide Visual opacity filter while
+   allowing the sound to continue.
+4. Sets the light to 100% brightness.
+5. Waits three seconds.
+6. Restores 20% brightness and resets the OBS source and filter.
 
-The action includes HTTP error logging, a five-second request
-timeout, and a finally block that attempts to restore the baseline.
-A lock prevents overlapping executions of this code's flash sequence.
+Both light settings use approximately 4100 K.
 
-The timed flash has been manually tested successfully.
-OBS integration and the channel point trigger are not implemented
-in this development action yet.
+The combined sequence has been manually tested successfully.
+The channel point trigger is not connected to this development
+action yet.
 
 ## Find the light's IP address
 
@@ -183,3 +185,30 @@ Status: Verified.
 The code compiled successfully. Running the Test trigger increased
 the brightness to 100% for approximately three seconds, then
 restored it to 20%.
+
+### Step 6: Integrate OBS animation and sound
+
+Added OBS control using:
+
+- Scene: Redeem Effects.
+- Media source: Flashbang.
+- Color Correction filter: Hide Visual, with opacity set to 0.
+
+The action starts the media, waits 1250 milliseconds, enables the
+opacity filter, and triggers the three-second light flash.
+The filter hides the picture while the media audio continues.
+
+Cleanup attempts to restore the light, hide the media source,
+and disable the opacity filter for the next run.
+
+The action stops before starting if OBS is disconnected.
+The explosion delay may need adjustment for playback and network
+latency.
+
+Status: Verified.
+
+The code compiled successfully. A manual test confirmed that the
+animation and sound played, the picture disappeared, and the light
+flashed before returning to 20% brightness.
+
+The sequence worked with an explosion delay of 1250 milliseconds.
