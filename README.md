@@ -2,7 +2,14 @@
 
 A custom C# action for Streamer.bot that synchronises an OBS flashbang animation and sound with an Elgato Key Light.
 
-## Planned behaviour
+## Quick setup
+
+To install and configure the finished action, follow [SETUP.md](SETUP.md).
+
+This README also records the development process, problems encountered,
+and verification of each feature.
+
+## Behaviour
 
 1. Play the flashbang animation and sound in OBS.
 2. Hide the animation when the flashbang explodes.
