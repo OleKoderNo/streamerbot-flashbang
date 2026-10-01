@@ -31,10 +31,10 @@ Edit the code in VS Code, then copy the updated code into Streamer.bot to compil
 
 ## Current progress
 
-The initial logging test works. Running the development action writes this message to Streamer.bot's log:
+The C# action successfully reads the Key Light's settings through its
+local HTTP API and writes the JSON response to Streamer.bot's log.
 
-`[Flashbang] Development action started.`
-
+The action includes a five-second request timeout and error logging.
 Light control and OBS integration are not implemented yet.
 
 ## Find the light's IP address
@@ -95,3 +95,42 @@ The browser returned settings for one light:
 
 This confirms that the computer can reach the light's local API.
 Reading the settings works even when the light's illumination is off.
+
+### Step 3: Read light settings from C#
+
+Added an HTTP GET request to the light's `/elgato/lights` endpoint.
+
+The action reuses an HttpClient with a five-second timeout and logs
+the response. If the request fails, it logs an error and returns false.
+
+This step only reads the settings. It does not change the light.
+
+Status: Verified.
+
+Compiled successfully and ran the action using a Core > Test trigger.
+The HTTP GET request returned settings for one light:
+power off, brightness 20%, and temperature 244 (approximately 4100 K).
+
+### Compilation issue: Missing System.dll reference
+
+The first compilation failed with error CS0012 because System.dll
+was missing from the code action's references.
+
+Fixed in Streamer.bot:
+
+1. Open the Execute C# Code sub-action.
+2. Select the References tab.
+3. Right-click the references list.
+4. Select Add reference from file.
+5. Add `C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.dll`.
+6. Compile again and save.
+
+If that path is unavailable, check:
+`C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.dll`.
+
+### Viewing test results
+
+1. Open the folder containing Streamer.bot.exe.
+2. Open the logs folder.
+3. Open the most recently modified log file.
+4. Search for `[Flashbang]`.
