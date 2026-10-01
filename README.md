@@ -45,8 +45,8 @@ Key Light flash.
 Both light settings use approximately 4100 K.
 
 The combined sequence has been manually tested successfully.
-The channel point trigger is not connected to this development
-action yet.
+The channel point reward is connected and has been tested through
+a real Twitch redemption.
 
 ## Find the light's IP address
 
@@ -212,3 +212,21 @@ animation and sound played, the picture disappeared, and the light
 flashed before returning to 20% brightness.
 
 The sequence worked with an explosion delay of 1250 milliseconds.
+
+### Step 7: Connect the channel point reward
+
+1. Select the Flashbang - Development action in Streamer.bot.
+2. Right-click inside the Triggers panel.
+3. Select Twitch > Channel Reward > Reward Redemption.
+4. Select the specific flashbang reward and save.
+
+Keep the Core > Test trigger for manual testing.
+
+OBS and Streamer.bot must be running, with Streamer.bot connected
+to OBS and the Twitch broadcaster account.
+
+Status: Verified.
+
+Redeemed the reward through my own Twitch channel and observed
+the full animation, sound, and light sequence. One redemption
+triggered one sequence, and the light returned to 20% brightness.
