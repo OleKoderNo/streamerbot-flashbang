@@ -31,11 +31,15 @@ Edit the code in VS Code, then copy the updated code into Streamer.bot to compil
 
 ## Current progress
 
-The C# action successfully reads the Key Light's settings through its
-local HTTP API and writes the JSON response to Streamer.bot's log.
+The C# action can read and update the Key Light's settings through
+its local HTTP API.
 
-The action includes a five-second request timeout and error logging.
-Light control and OBS integration are not implemented yet.
+The baseline test turns the light on at 20% brightness and
+approximately 4100 K, then reads and logs the settings.
+
+Requests use a five-second timeout, and failures are logged.
+
+The timed flash and OBS integration are not implemented yet.
 
 ## Find the light's IP address
 
@@ -134,3 +138,20 @@ If that path is unavailable, check:
 2. Open the logs folder.
 3. Open the most recently modified log file.
 4. Search for `[Flashbang]`.
+
+### Step 4: Apply baseline light settings
+
+Added an HTTP PUT request to set the light to:
+
+- Power: on.
+- Brightness: 20%.
+- Temperature: 244, approximately 4100 K.
+
+The action checks the HTTP response for success, then sends a GET
+request and logs the returned settings for verification.
+
+Status: Verified.
+
+The code compiled successfully. Running the Test trigger turned the
+light on at 20% brightness and approximately 4100 K. The follow-up
+GET request confirmed the expected settings.

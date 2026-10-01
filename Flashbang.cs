@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Text;
 
 public class CPHInline
 {
@@ -13,22 +14,39 @@ public class CPHInline
         string lightIp = "192.168.68.53";
         string lightUrl = $"http://{lightIp}:9123/elgato/lights";
 
+        string settingsJson =
+            "{\"numberOfLights\":1,\"lights\":[{\"on\":1,\"brightness\":20,\"temperature\":244}]}";
+
         try
         {
-            CPH.LogInfo("[Flashbang] Reading light settings.");
+            CPH.LogInfo("[Flashbang] Setting baseline light settings.");
 
-            string response = httpClient
+            using (var content = new StringContent(
+                settingsJson,
+                Encoding.UTF8,
+                "application/json"))
+            {
+                using (var response = httpClient
+                    .PutAsync(lightUrl, content)
+                    .GetAwaiter()
+                    .GetResult())
+                {
+                    response.EnsureSuccessStatusCode();
+                }
+            }
+
+            string currentSettings = httpClient
                 .GetStringAsync(lightUrl)
                 .GetAwaiter()
                 .GetResult();
 
-            CPH.LogInfo($"[Flashbang] Light settings: {response}");
+            CPH.LogInfo($"[Flashbang] Settings after update: {currentSettings}");
 
             return true;
         }
         catch (Exception error)
         {
-            CPH.LogError($"[Flashbang] Could not read light: {error.Message}");
+            CPH.LogError($"[Flashbang] Baseline test failed: {error.Message}");
 
             return false;
         }
