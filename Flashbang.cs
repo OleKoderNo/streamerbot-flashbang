@@ -9,46 +9,60 @@ public class CPHInline
         Timeout = TimeSpan.FromSeconds(5)
     };
 
+    private static readonly object flashLock = new object();
+
     public bool Execute()
     {
         string lightIp = "192.168.68.53";
         string lightUrl = $"http://{lightIp}:9123/elgato/lights";
 
-        string settingsJson =
-            "{\"numberOfLights\":1,\"lights\":[{\"on\":1,\"brightness\":20,\"temperature\":244}]}";
-
-        try
+        lock (flashLock)
         {
-            CPH.LogInfo("[Flashbang] Setting baseline light settings.");
-
-            using (var content = new StringContent(
-                settingsJson,
-                Encoding.UTF8,
-                "application/json"))
+            try
             {
-                using (var response = httpClient
-                    .PutAsync(lightUrl, content)
-                    .GetAwaiter()
-                    .GetResult())
+                try
                 {
-                    response.EnsureSuccessStatusCode();
+                    SetLight(lightUrl, 100);
+                    CPH.LogInfo("[Flashbang] Brightness set to 100%.");
+
+                    CPH.Wait(3000);
                 }
+                finally
+                {
+                    SetLight(lightUrl, 20);
+                    CPH.LogInfo("[Flashbang] Baseline restored to 20%.");
+                }
+
+                return true;
             }
+            catch (Exception error)
+            {
+                CPH.LogError($"[Flashbang] Flash failed: {error.Message}");
 
-            string currentSettings = httpClient
-                .GetStringAsync(lightUrl)
-                .GetAwaiter()
-                .GetResult();
-
-            CPH.LogInfo($"[Flashbang] Settings after update: {currentSettings}");
-
-            return true;
+                return false;
+            }
         }
-        catch (Exception error)
-        {
-            CPH.LogError($"[Flashbang] Baseline test failed: {error.Message}");
+    }
 
-            return false;
+    private void SetLight(string lightUrl, int brightness)
+    {
+        string settingsJson =
+            "{\"numberOfLights\":1,\"lights\":[{\"on\":1,\"brightness\":"
+            + brightness
+            + ",\"temperature\":244}]}";
+
+        using (var content = new StringContent(
+            settingsJson,
+            Encoding.UTF8,
+            "application/json"))
+        {
+            using (var response = httpClient
+                .PutAsync(lightUrl, content)
+                .GetAwaiter()
+                .GetResult())
+            {
+                response.EnsureSuccessStatusCode();
+            }
         }
     }
 }

@@ -31,15 +31,20 @@ Edit the code in VS Code, then copy the updated code into Streamer.bot to compil
 
 ## Current progress
 
-The C# action can read and update the Key Light's settings through
-its local HTTP API.
+The C# action runs a timed flash on one Elgato Key Light:
 
-The baseline test turns the light on at 20% brightness and
-approximately 4100 K, then reads and logs the settings.
+- Sets brightness to 100%.
+- Waits three seconds.
+- Restores brightness to 20%.
+- Uses approximately 4100 K for both settings.
 
-Requests use a five-second timeout, and failures are logged.
+The action includes HTTP error logging, a five-second request
+timeout, and a finally block that attempts to restore the baseline.
+A lock prevents overlapping executions of this code's flash sequence.
 
-The timed flash and OBS integration are not implemented yet.
+The timed flash has been manually tested successfully.
+OBS integration and the channel point trigger are not implemented
+in this development action yet.
 
 ## Find the light's IP address
 
@@ -155,3 +160,26 @@ Status: Verified.
 The code compiled successfully. Running the Test trigger turned the
 light on at 20% brightness and approximately 4100 K. The follow-up
 GET request confirmed the expected settings.
+
+### Step 5: Add the timed flash
+
+Moved the light update request into a reusable SetLight method.
+
+The action now:
+
+1. Turns the light on at 100% brightness and approximately 4100 K.
+2. Waits 3000 milliseconds after the request succeeds.
+3. Restores 20% brightness and approximately 4100 K.
+
+A finally block attempts restoration even if the flash request fails.
+Restoration depends on the light remaining reachable.
+
+A lock prevents overlapping executions of this code's flash sequence.
+Network delays can make the physical flash slightly longer than
+three seconds.
+
+Status: Verified.
+
+The code compiled successfully. Running the Test trigger increased
+the brightness to 100% for approximately three seconds, then
+restored it to 20%.
